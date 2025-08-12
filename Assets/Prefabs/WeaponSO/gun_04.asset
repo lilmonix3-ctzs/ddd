@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f4459dd066690741b3ee230581d5bb8, type: 3}
+  m_Name: gun_04
+  m_EditorClassIdentifier: 
+  objectName: gun_04
+  objectSprite: {fileID: 21300000, guid: fd314f842bff32e44bc1e488a8774beb, type: 3}
+  prefab: {fileID: 9196793406238956559, guid: 85ed2ad27dbeec24596ca0b2ff7ab369, type: 3}
+  damage: 30
+  bulletSpeed: 20
+  attackSpeed: 1
+  attackRange: 5

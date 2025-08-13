@@ -71,8 +71,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -1727548665
+  m_SortingLayer: 1
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 19ef829ffc990bb48aa8be019d0e3d96, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -107,8 +107,12 @@ MonoBehaviour:
   - {fileID: 21300000, guid: f9fadd122f24260498cd9784e1482842, type: 3}
   - {fileID: 21300000, guid: 19ba2c48d1df6814c8831ab83d3cf0b9, type: 3}
   - {fileID: 21300000, guid: 4818506d419582044a8bc13a73cf3a3c, type: 3}
-  dodgeFrames: []
-  frameRate: 0.1
+  dodgeFrames:
+  - {fileID: 21300000, guid: 8dc97950ca876cf4f957be050ad4f87d, type: 3}
+  - {fileID: 21300000, guid: 82901798c8794b04c80602b5dbd97760, type: 3}
+  - {fileID: 21300000, guid: 6bffa65fa329af243879742d65165686, type: 3}
+  - {fileID: 21300000, guid: bcda59645bb934e419de61d0eff86f6e, type: 3}
+  frameRate: 0.08
 --- !u!1 &1996217279183561317
 GameObject:
   m_ObjectHideFlags: 0
@@ -118,7 +122,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8572041364662590381}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: FirePonit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -251,11 +255,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ae87eff395190c4183bbb614cef3bdf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 4
+  originSpeed: 5
+  shootingSpeed: 2
   moveSmoothTime: 0.1
   playerwidth: 0.35
   playerheight: 0.5
   dogeSpeed: 10
+  weaponHold: {fileID: 1526276797416835029}
   animator: {fileID: 2551190659862398646}
 --- !u!114 &1526276797416835029
 MonoBehaviour:
@@ -275,10 +281,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 99a110820879b6b4aa6ac16e595e94de, type: 2}
   - {fileID: 11400000, guid: 8fe1a882beb8b3e48a066bb03cd06735, type: 2}
   - {fileID: 11400000, guid: 99bad81fc71f50643a340c70c1a842ea, type: 2}
-  maxDistanceFromPlayer: 0.5
+  maxDistanceFromPlayer: 0.4
   bulletPrefab: {fileID: 2310286472120886443, guid: 0616e298a7fa2d644aca030a200ed1eb, type: 3}
   firePoint: {fileID: 8572041364662590381}
   bulletPoolSize: 20
+  reloadTime: 1.5
 --- !u!1 &8888751475069813500
 GameObject:
   m_ObjectHideFlags: 0

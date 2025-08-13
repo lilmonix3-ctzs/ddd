@@ -16,6 +16,7 @@ MonoBehaviour:
   objectSprite: {fileID: 21300000, guid: 9cacf7f03ec50484d9036324d7adfdf1, type: 3}
   prefab: {fileID: 7880066654226189689, guid: 8b675ac35d6e2424e8a74f9c138beca6, type: 3}
   damage: 6
-  bulletSpeed: 20
+  bulletSpeed: 10
   attackSpeed: 4
-  attackRange: 5
+  attackRange: 3.5
+  ReloadTime: 1

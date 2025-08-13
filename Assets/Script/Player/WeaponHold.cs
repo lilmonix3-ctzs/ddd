@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
 
 public class WeaponHold : MonoBehaviour
 {
@@ -10,11 +11,19 @@ public class WeaponHold : MonoBehaviour
     [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private Transform firePoint;
     [SerializeField] private int bulletPoolSize = 20;
+    [SerializeField] private float reloadTime = 1.5f;
+    [SerializeField] private float gamepadDeadzone = 0.2f; // 手柄死区阈值
 
     private int weaponCount;
     private int weaponIndex;
     private Camera mainCamera;
     private Queue<GameObject> bulletPool = new Queue<GameObject>();
+
+    // 射击控制相关变量
+    private bool isReloading = false;
+    private float fireTimer = 0f;
+    private WeaponSO currentWeapon;
+    private bool isFireing = false;
 
     private void Awake()
     {
@@ -38,9 +47,6 @@ public class WeaponHold : MonoBehaviour
         {
             return bulletPool.Dequeue();
         }
-
-        // 如果池空了，创建新子弹（但应该根据游戏设计调整池大小）
-        Debug.LogWarning("Bullet pool empty, instantiating new bullet");
         return Instantiate(bulletPrefab);
     }
 
@@ -53,13 +59,44 @@ public class WeaponHold : MonoBehaviour
     private void Start()
     {
         weaponCount = weaponSOs.Length;
-        if (weaponCount > 0) EquipWeapon(weaponIndex);
+        if (weaponCount > 0)
+        {
+            EquipWeapon(weaponIndex);
+            currentWeapon = GetCurrentWeapon();
+        }
     }
 
     private void Update()
     {
+        if (fireTimer > 0)
+        {
+            fireTimer -= Time.deltaTime;
+        }
+
         UpdateWeaponHoldPoint();
         HandleWeaponInteractions();
+
+        if (!isReloading && bulletPool.Count <= 0)
+        {
+            StartCoroutine(ReloadBullets());
+        }
+    }
+
+    private IEnumerator ReloadBullets()
+    {
+        isReloading = true;
+
+        while (bulletPool.Count < bulletPoolSize)
+        {
+            yield return new WaitForSeconds(reloadTime / bulletPoolSize);
+            GameObject bullet = Instantiate(bulletPrefab);
+            bullet.SetActive(false);
+            bulletPool.Enqueue(bullet);
+
+            Debug.Log($"Reloading: {bulletPool.Count} / {bulletPoolSize}");
+        }
+
+        isReloading = false;
     }
 
     private void HandleWeaponInteractions()
@@ -69,17 +106,39 @@ public class WeaponHold : MonoBehaviour
             SwitchWeapon(1);
         }
 
-        if (GameInput.Instance.IsAttackClick())
+        if (GameInput.Instance.IsAttackPressed())
         {
-            WeaponSO currentWeapon = GetCurrentWeapon();
             if (currentWeapon != null)
             {
-                FireBullet(currentWeapon);
+                TryFireBullet();
             }
+        }
+        else
+        {
+            isFireing = false;
         }
     }
 
-    private void FireBullet(WeaponSO weapon)
+    private void TryFireBullet()
+    {
+        if (isReloading || fireTimer > 0)
+        {
+            isFireing = !isReloading;
+            return;
+        }
+
+        if (bulletPool.Count <= 0)
+        {
+            isFireing = false;
+            StartCoroutine(ReloadBullets());
+            return;
+        }
+        isFireing = true;
+        FireBullet();
+        fireTimer = 1f / currentWeapon.attackSpeed;
+    }
+
+    private void FireBullet()
     {
         GameObject bullet = GetBulletFromPool();
         bullet.transform.position = firePoint.position;
@@ -91,81 +150,77 @@ public class WeaponHold : MonoBehaviour
         {
             bulletScript.Initialize(
                 firePoint.rotation,
-                weapon.attackSpeed,
-                weapon.attackRange,
-                weapon.damage);
-        }
-        else
-        {
-            Debug.LogError("Bullet script missing on bullet prefab!");
+                currentWeapon.bulletSpeed,
+                currentWeapon.attackRange,
+                currentWeapon.damage);
         }
     }
 
-    // 更新武器持有点位置和朝向
+    // 修改点：更新武器持有点位置和朝向（支持手柄和鼠标）
     private void UpdateWeaponHoldPoint()
     {
         if (weaponHoldPoint == null) return;
 
-        // 获取鼠标位置（世界坐标）
-        Vector3 mouseWorldPosition = mainCamera.ScreenToWorldPoint(Input.mousePosition);
-        mouseWorldPosition.z = 0f; // 确保z轴为0
-
-        // 玩家位置
         Vector3 playerPosition = transform.position;
+        Vector3 aimDirection = Vector3.zero;
+        bool usingGamepad = false;
 
-        // 计算从玩家到鼠标的方向
-        Vector3 directionToMouse = mouseWorldPosition - playerPosition;
-        directionToMouse.z = 0;
+        // 获取手柄瞄准输入
+        Vector2 gamepadAim = GameInput.Instance.GetAimDir();
 
-        // 限制距离不超过最大范围
-        if (directionToMouse.magnitude > maxDistanceFromPlayer)
+        // 检查手柄输入是否超过死区
+        if (gamepadAim.magnitude > gamepadDeadzone)
         {
-            directionToMouse = directionToMouse.normalized * maxDistanceFromPlayer;
+            aimDirection = new Vector3(gamepadAim.x, gamepadAim.y, 0f);
+            usingGamepad = true;
+        }
+        // 如果没有手柄输入，则使用鼠标
+        else
+        {
+            Vector3 mouseWorldPosition = mainCamera.ScreenToWorldPoint(Input.mousePosition);
+            mouseWorldPosition.z = 0f;
+            aimDirection = (mouseWorldPosition - playerPosition);
         }
 
-        // 设置持有点位置（在玩家和鼠标之间）
-        weaponHoldPoint.position = playerPosition + directionToMouse;
-
-        // 使持有点始终面向鼠标位置
-        Vector3 lookDirection = directionToMouse;
-        if (lookDirection != Vector3.zero)
+        // 限制距离不超过最大范围
+        if (aimDirection.magnitude > maxDistanceFromPlayer)
         {
-            // 计算旋转角度（2D）
-            float angle = Mathf.Atan2(lookDirection.y, lookDirection.x) * Mathf.Rad2Deg;
+            aimDirection = aimDirection.normalized * maxDistanceFromPlayer;
+        }
+
+        // 设置持有点位置
+        weaponHoldPoint.position = playerPosition + aimDirection;
+
+        // 使持有点始终面向瞄准方向
+        if (aimDirection != Vector3.zero)
+        {
+            float angle = Mathf.Atan2(aimDirection.y, aimDirection.x) * Mathf.Rad2Deg;
             weaponHoldPoint.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
         }
 
-        //当鼠标位置在玩家左侧时，翻转武器
-        if (mouseWorldPosition.x < playerPosition.x)
+        // 当瞄准方向在玩家左侧时，翻转武器
+        if (aimDirection.x < 0)
         {
-            weaponHoldPoint.localScale = new Vector3(1f, -1f, 1f); // 翻转武器
+            weaponHoldPoint.localScale = new Vector3(1f, -1f, 1f);
         }
         else
         {
-            weaponHoldPoint.localScale = new Vector3(1f, 1f, 1f); // 正常方向
+            weaponHoldPoint.localScale = new Vector3(1f, 1f, 1f);
         }
     }
 
-    // 装备武器
     public void EquipWeapon(int index)
     {
-        if (index < 0 || index >= weaponCount)
-        {
-            Debug.LogError("Invalid weapon index: " + index);
-            return;
-        }
+        if (index < 0 || index >= weaponCount) return;
 
-        // 清除当前持有的武器
         foreach (Transform child in weaponHoldPoint)
         {
-            // 只销毁标记为"Weapon"的对象
             if (child.CompareTag("Weapon"))
             {
                 Destroy(child.gameObject);
             }
         }
 
-        // 实例化新的武器
         WeaponSO weaponSO = weaponSOs[index];
         if (weaponSO.prefab != null)
         {
@@ -176,17 +231,11 @@ public class WeaponHold : MonoBehaviour
                 weaponHoldPoint
             );
             weaponInstance.name = weaponSO.objectName;
-
-            // 添加武器标记
             weaponInstance.tag = "Weapon";
-        }
-        else
-        {
-            Debug.LogWarning($"Weapon prefab is missing for {weaponSO.objectName}");
+            currentWeapon = weaponSO;
         }
     }
 
-    // 切换武器
     public void SwitchWeapon(int direction)
     {
         weaponIndex += direction;
@@ -195,20 +244,13 @@ public class WeaponHold : MonoBehaviour
         EquipWeapon(weaponIndex);
     }
 
-    // 获取当前武器
     public WeaponSO GetCurrentWeapon()
     {
-        if (weaponIndex < 0 || weaponIndex >= weaponCount)
-        {
-            Debug.LogError("Invalid weapon index: " + weaponIndex);
-            return null;
-        }
+        if (weaponIndex < 0 || weaponIndex >= weaponCount) return null;
         return weaponSOs[weaponIndex];
     }
 
-    // 获取当前武器的数量
     public int GetWeaponCount() => weaponCount;
-
-    // 获取当前武器的索引
     public int GetCurrentWeaponIndex() => weaponIndex;
+    public bool IsFiring() => isFireing;
 }

@@ -12,6 +12,7 @@ public class SpriteAnimator : MonoBehaviour
     private float timer;
     private int currentFrame;
     private PlayerState currentState;
+    //private bool Waiting = false;
 
     // 将枚举设为public
     public enum PlayerState { Idle, Walk, Dodge }
@@ -30,6 +31,7 @@ public class SpriteAnimator : MonoBehaviour
             timer = 0;
             currentFrame = (currentFrame + 1) % GetCurrentFrames().Length;
             spriteRenderer.sprite = GetCurrentFrames()[currentFrame];
+            //if (currentFrame == 0) Waiting = false;
         }
 
     }
@@ -39,7 +41,7 @@ public class SpriteAnimator : MonoBehaviour
         switch (currentState)
         {
             case PlayerState.Walk: return walkFrames;
-            case PlayerState.Dodge: return dodgeFrames;
+            case PlayerState.Dodge:  return dodgeFrames;
             default: return idleFrames;
         }
     }
@@ -47,10 +49,13 @@ public class SpriteAnimator : MonoBehaviour
     public void SetState(PlayerState newState)
     {
         if (currentState != newState)
+            //&& !Waiting)
         {
             currentState = newState;
             currentFrame = 0;
         }
+        //if (newState == PlayerState.Dodge)
+        //    Waiting = true;
     }
 
     public void Turn(bool IsRight)
@@ -60,4 +65,9 @@ public class SpriteAnimator : MonoBehaviour
         else
             transform.localScale = new Vector3(-1, 1, 1);
     }
+
+    //public void Continue()
+    //{
+    //    Waiting = false;
+    //}
 }

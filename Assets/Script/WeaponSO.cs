@@ -10,7 +10,8 @@ public class WeaponSO : ScriptableObject
     public Sprite objectSprite;
     public Transform prefab;
     public float damage = 10f;
-    public float bulletSpeed = 20f; // 射速
+    public float bulletSpeed = 20f; // 子弹速度
     public float attackSpeed = 1f; // 每秒攻击次数
     public float attackRange = 5f; // 攻击范围
+    public float ReloadTime = 1f;  //换弹时间
 }

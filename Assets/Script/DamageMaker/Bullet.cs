@@ -8,7 +8,7 @@ public class Bullet : MonoBehaviour
 
     private float speed;
     private float lifetime;
-    private float damage;
+    private int damage;
     private Rigidbody2D rb;
 
     void Awake()
@@ -21,7 +21,7 @@ public class Bullet : MonoBehaviour
         }
     }
 
-    public void Initialize(Quaternion shootDirection, float Speed, float AttackRange, float Damage)
+    public void Initialize(Quaternion shootDirection, float Speed, float AttackRange, int Damage)
     {
         speed = Speed;
         lifetime = AttackRange / speed;
@@ -43,7 +43,11 @@ public class Bullet : MonoBehaviour
         //if (other.CompareTag("Bullet") || other.CompareTag("Player"))
         //    return;
 
-        //// 伤害处理
+        // 伤害处理
+        Enemy enemy = other.GetComponent<Enemy>();
+        if (enemy != null) {
+            enemy.TakeDamage(damage);
+        }
         //Health health = other.GetComponent<Health>();
         //if (health != null)
         //{
@@ -54,8 +58,8 @@ public class Bullet : MonoBehaviour
         //if (hitEffectPrefab != null)
         //    Instantiate(hitEffectPrefab, transform.position, Quaternion.identity);
 
-        if (hitSound != null)
-            AudioSource.PlayClipAtPoint(hitSound, transform.position);
+        //if (hitSound != null)
+        //    AudioSource.PlayClipAtPoint(hitSound, transform.position);
 
         Destroy(gameObject);
     }

@@ -13,6 +13,9 @@ public class WeaponHold : MonoBehaviour
     [SerializeField] private int bulletPoolSize = 20;
     [SerializeField] private float reloadTime = 1.5f;
     [SerializeField] private float gamepadDeadzone = 0.2f; // 手柄死区阈值
+    [SerializeField] private Transform Aim;
+    [SerializeField] private float aimToMouse = 0.7f; //瞄准线缩放比
+    [SerializeField] private float maxaimScale = 1f; //最大缩放
 
     private int weaponCount;
     private int weaponIndex;
@@ -163,7 +166,7 @@ public class WeaponHold : MonoBehaviour
 
         Vector3 playerPosition = transform.position;
         Vector3 aimDirection = Vector3.zero;
-        bool usingGamepad = false;
+        //bool usingGamepad = false;
 
         // 获取手柄瞄准输入
         Vector2 gamepadAim = GameInput.Instance.GetAimDir();
@@ -172,7 +175,7 @@ public class WeaponHold : MonoBehaviour
         if (gamepadAim.magnitude > gamepadDeadzone)
         {
             aimDirection = new Vector3(gamepadAim.x, gamepadAim.y, 0f);
-            usingGamepad = true;
+            //usingGamepad = true;
         }
         // 如果没有手柄输入，则使用鼠标
         else
@@ -180,6 +183,10 @@ public class WeaponHold : MonoBehaviour
             Vector3 mouseWorldPosition = mainCamera.ScreenToWorldPoint(Input.mousePosition);
             mouseWorldPosition.z = 0f;
             aimDirection = (mouseWorldPosition - playerPosition);
+            // 使用鼠标输入时，缩放瞄准线
+            float aimScale = Mathf.Clamp(aimDirection.magnitude * aimToMouse, 0f, maxaimScale);
+            Aim.localScale = new Vector3(aimScale, 1f,1f);
+
         }
 
         // 限制距离不超过最大范围

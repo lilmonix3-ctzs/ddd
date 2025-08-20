@@ -22,7 +22,7 @@ public class SpriteAnimator : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
-    void Update()
+    void FixedUpdate()
     {
         timer += Time.deltaTime;
 

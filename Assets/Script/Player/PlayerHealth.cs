@@ -59,7 +59,7 @@ public class PlayerHealth : MonoBehaviour
         }
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         // 更新无敌计时器
         if (invincibilityTimer > 0)

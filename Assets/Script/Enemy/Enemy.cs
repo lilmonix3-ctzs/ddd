@@ -34,7 +34,7 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         if (playerTransform == null) return;
 

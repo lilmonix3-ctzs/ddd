@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6612922429694485149
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1044754862009178369}
+  - component: {fileID: 1068642961407045009}
+  m_Layer: 0
+  m_Name: EnemySpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1044754862009178369
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6612922429694485149}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1068642961407045009
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6612922429694485149}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55917a02f8e39cd4599230b2566f6005, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enemyPrefabs:
+  - {fileID: 1646565749638624866, guid: 0d62106aec391104fab99d738759de74, type: 3}
+  spawnInterval: 3
+  maxEnemies: 10
+  spawnRadius: 10
+  minDistanceFromPlayer: 0.1
+  spawnCheckRadius: 1
+  totalTimeToSpawn: 90
+  increaseDifficultyOverTime: 1
+  difficultyInterval: 30
+  minSpawnInterval: 0.5
+  spawnIntervalDecrease: 0.1
+  maxEnemiesIncrease: 2
+  portalPrefab: {fileID: 2471299135480978864, guid: 174851ba5d99fd44d8e1901a9f65d838, type: 3}
+  portalSpawnOffset: {x: 0, y: 0, z: 0}
+  nextSceneName: NextLevel

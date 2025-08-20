@@ -15,7 +15,7 @@ public class WeaponHold : MonoBehaviour
     [SerializeField] private float gamepadDeadzone = 0.2f; // 手柄死区阈值
     [SerializeField] private Transform Aim;
     [SerializeField] private float aimToMouse = 0.7f; //瞄准线缩放比
-    [SerializeField] private float maxaimScale = 1f; //最大缩放
+    [SerializeField] private float maxaimScale = 1.5f; //最大缩放
 
     private int weaponCount;
     private int weaponIndex;
@@ -180,6 +180,7 @@ public class WeaponHold : MonoBehaviour
         // 如果没有手柄输入，则使用鼠标
         else
         {
+            if(mainCamera == null) return;
             Vector3 mouseWorldPosition = mainCamera.ScreenToWorldPoint(Input.mousePosition);
             mouseWorldPosition.z = 0f;
             aimDirection = (mouseWorldPosition - playerPosition);

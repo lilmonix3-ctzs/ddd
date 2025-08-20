@@ -2,72 +2,38 @@ using UnityEngine;
 
 public class SpriteAnimator : MonoBehaviour
 {
-    public Sprite[] idleFrames;
-    public Sprite[] walkFrames;
-    public Sprite[] dodgeFrames;
+    [SerializeField] private Animator animator;
+    [SerializeField] private BaseMovement baseMovement;
+    [SerializeField] private PlayerHealth playerHealth;
 
-    [SerializeField] private float frameRate = 0.1f;
+    private const string RunAnimation = "run";
+    private const string DodgeAnimation = "dodge";
+    private const string WalkAnimation = "walk";
+    private const string DieAnimation = "die";
 
-    private SpriteRenderer spriteRenderer;
-    private float timer;
-    private int currentFrame;
-    private PlayerState currentState;
-    //private bool Waiting = false;
-
-    // 将枚举设为public
-    public enum PlayerState { Idle, Walk, Dodge }
 
     void Start()
     {
-        spriteRenderer = GetComponent<SpriteRenderer>();
+        animator = GetComponent<Animator>();
     }
 
     void FixedUpdate()
     {
-        timer += Time.deltaTime;
-
-        if (timer >= frameRate)
+        animator.SetBool(RunAnimation, baseMovement.IsWalking());
+        animator.SetBool(DodgeAnimation, baseMovement.IsDodging());
+        animator.SetBool(WalkAnimation, baseMovement.IsSlowed());
+        if(playerHealth.IsDead()) animator.SetTrigger(DieAnimation);
+        if (baseMovement.IsFacingRight())
         {
-            timer = 0;
-            currentFrame = (currentFrame + 1) % GetCurrentFrames().Length;
-            spriteRenderer.sprite = GetCurrentFrames()[currentFrame];
-            //if (currentFrame == 0) Waiting = false;
-        }
-
-    }
-
-    private Sprite[] GetCurrentFrames()
-    {
-        switch (currentState)
-        {
-            case PlayerState.Walk: return walkFrames;
-            case PlayerState.Dodge:  return dodgeFrames;
-            default: return idleFrames;
-        }
-    }
-
-    public void SetState(PlayerState newState)
-    {
-        if (currentState != newState)
-            //&& !Waiting)
-        {
-            currentState = newState;
-            currentFrame = 0;
-        }
-        //if (newState == PlayerState.Dodge)
-        //    Waiting = true;
-    }
-
-    public void Turn(bool IsRight)
-    {
-        if (IsRight)
             transform.localScale = new Vector3(1, 1, 1);
+        }
         else
+        {
             transform.localScale = new Vector3(-1, 1, 1);
+        }
+
     }
 
-    //public void Continue()
-    //{
-    //    Waiting = false;
-    //}
+
+
 }

@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5453285437174193615}
   - component: {fileID: 8115351218569538291}
   - component: {fileID: 2551190659862398646}
+  - component: {fileID: 7940931231550348255}
   m_Layer: 12
   m_Name: sprite
   m_TagString: Untagged
@@ -72,7 +73,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1727548665
-  m_SortingLayer: 1
+  m_SortingLayer: 3
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 19ef829ffc990bb48aa8be019d0e3d96, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -97,22 +98,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c7c9ee3981f7e3428ddcce17119596a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  idleFrames:
-  - {fileID: 21300000, guid: 3aca5c739865fda41b4594c844e3762c, type: 3}
-  - {fileID: 21300000, guid: c2822aad2c5bab040a49ceab4dac76bb, type: 3}
-  - {fileID: 21300000, guid: b5c79cbbcf31b864e8ae7b7dcb91e257, type: 3}
-  - {fileID: 21300000, guid: 7ea2d6363fd80f2459a59f49e30d8ce9, type: 3}
-  walkFrames:
-  - {fileID: 21300000, guid: e0f56b4a651c27a4694fd153bf5cbe77, type: 3}
-  - {fileID: 21300000, guid: f9fadd122f24260498cd9784e1482842, type: 3}
-  - {fileID: 21300000, guid: 19ba2c48d1df6814c8831ab83d3cf0b9, type: 3}
-  - {fileID: 21300000, guid: 4818506d419582044a8bc13a73cf3a3c, type: 3}
-  dodgeFrames:
-  - {fileID: 21300000, guid: 8dc97950ca876cf4f957be050ad4f87d, type: 3}
-  - {fileID: 21300000, guid: 82901798c8794b04c80602b5dbd97760, type: 3}
-  - {fileID: 21300000, guid: 6bffa65fa329af243879742d65165686, type: 3}
-  - {fileID: 21300000, guid: bcda59645bb934e419de61d0eff86f6e, type: 3}
-  frameRate: 0.08
+  animator: {fileID: 7940931231550348255}
+  baseMovement: {fileID: 3848565756016797724}
+  playerHealth: {fileID: 7839371634580720210}
+--- !u!95 &7940931231550348255
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1227094722260501356}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 22c8fb9fddfc6874d9369db84e53dfea, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1242585573924828864
 GameObject:
   m_ObjectHideFlags: 0
@@ -184,7 +193,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 1451005127
-  m_SortingLayer: 2
+  m_SortingLayer: 4
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 6c651326e25b2464ebc79f6bd733c61c, type: 3}
   m_Color: {r: 0.8962264, g: 0.875089, b: 0.875089, a: 0.7019608}
@@ -243,6 +252,7 @@ GameObject:
   - component: {fileID: 3848565756016797724}
   - component: {fileID: 1526276797416835029}
   - component: {fileID: 7839371634580720210}
+  - component: {fileID: -5872209452350765804}
   m_Layer: 12
   m_Name: GunMan
   m_TagString: Player
@@ -347,6 +357,8 @@ MonoBehaviour:
   playerwidth: 0.35
   playerheight: 0.5
   dogeSpeed: 10
+  dogeTime: 20
+  dodgeinterval: 2
   weaponHold: {fileID: 1526276797416835029}
   animator: {fileID: 2551190659862398646}
 --- !u!114 &1526276797416835029
@@ -374,8 +386,8 @@ MonoBehaviour:
   reloadTime: 1.5
   gamepadDeadzone: 0.2
   Aim: {fileID: 1030821161297416525}
-  aimToMouse: 0.5
-  maxaimScale: 1.5
+  aimToMouse: 0.6
+  maxaimScale: 3
 --- !u!114 &7839371634580720210
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -397,6 +409,18 @@ MonoBehaviour:
   shakeDuration: 0.5
   shakeAmplitude: 2
   shakeFrequency: 2
+--- !u!114 &-5872209452350765804
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5154253391958730311}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1858ba18eeadb6a46a1df8b161c6f32e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8888751475069813500
 GameObject:
   m_ObjectHideFlags: 0

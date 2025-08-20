@@ -1,5 +1,7 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
+using UnityEditor.Experimental.GraphView;
 
 public class EnemySpawner : MonoBehaviour
 {
@@ -10,6 +12,7 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private float spawnRadius = 10f; // 生成半径（玩家为中心）
     [SerializeField] private float minDistanceFromPlayer = 5f; // 距离玩家最小距离
     [SerializeField] private float spawnCheckRadius = 1f; // 生成点检查半径
+    [SerializeField] private int totalTimeToSpawn = 90; // 总生成时间（秒）
 
     [Header("难度设置")]
     [SerializeField] private bool increaseDifficultyOverTime = true; // 随时间增加难度
@@ -18,12 +21,22 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private float spawnIntervalDecrease = 0.1f; // 每次难度增加时减少的间隔
     [SerializeField] private int maxEnemiesIncrease = 2; // 每次难度增加时增加的敌人数
 
+    [Header("传送门设置")]
+    [SerializeField] private GameObject portalPrefab; // 传送门预制体
+    [SerializeField] private Vector3 portalSpawnOffset = new Vector3(0, 0, 0); // 传送门生成偏移
+    [SerializeField] private string nextSceneName = "NextLevel"; // 下一关场景名称
+
     private Transform playerTransform;
     private int currentEnemies = 0;
     private float difficultyTimer = 0f;
+    private float spawnTimer = 0f;
+    private bool spawningActive = true;
+    private bool portalSpawned = false;
+    private GameObject portalInstance;
 
     private void Start()
     {
+
         playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
 
         if (playerTransform == null)
@@ -40,11 +53,20 @@ public class EnemySpawner : MonoBehaviour
         {
             StartCoroutine(IncreaseDifficultyOverTime());
         }
+
+        // 开始总时间计时
+        StartCoroutine(TotalSpawnTimeCountdown());
+    }
+
+    private void Update()
+    {
+        // 检查是否应该生成传送门
+        CheckForPortalSpawn();
     }
 
     private IEnumerator SpawnEnemies()
     {
-        while (true)
+        while (spawningActive)
         {
             // 如果当前敌人数小于最大值
             if (currentEnemies < maxEnemies)
@@ -54,6 +76,21 @@ public class EnemySpawner : MonoBehaviour
 
             // 等待生成间隔
             yield return new WaitForSeconds(spawnInterval);
+        }
+    }
+
+    private IEnumerator TotalSpawnTimeCountdown()
+    {
+        yield return new WaitForSeconds(totalTimeToSpawn);
+
+        // 到达最大生成时间，停止生成
+        spawningActive = false;
+        Debug.Log("到达最大生成时间，停止生成敌人");
+
+        // 如果已经没有敌人，直接生成传送门
+        if (currentEnemies <= 0)
+        {
+            SpawnPortal();
         }
     }
 
@@ -127,11 +164,53 @@ public class EnemySpawner : MonoBehaviour
     public void EnemyDied()
     {
         currentEnemies--;
+
+        // 检查是否应该生成传送门
+        CheckForPortalSpawn();
+    }
+
+    private void CheckForPortalSpawn()
+    {
+        // 如果已经生成过传送门，不再检查
+        if (portalSpawned) return;
+
+        // 如果停止生成且没有敌人，生成传送门
+        if (!spawningActive && currentEnemies <= 0)
+        {
+            SpawnPortal();
+        }
+    }
+
+    private void SpawnPortal()
+    {
+        if (portalSpawned) return;
+
+        portalSpawned = true;
+
+        if (portalPrefab != null)
+        {
+            // 在玩家附近生成传送门
+            Vector3 portalPosition = playerTransform.position + portalSpawnOffset;
+            portalInstance = Instantiate(portalPrefab, portalPosition, Quaternion.identity);
+
+            // 设置传送门行为
+            Portal portalScript = portalInstance.GetComponent<Portal>();
+            if (portalScript != null)
+            {
+                portalScript.SetTargetScene(nextSceneName);
+            }
+
+            Debug.Log("传送门已生成");
+        }
+        else
+        {
+            Debug.LogWarning("未设置传送门预制体！");
+        }
     }
 
     private IEnumerator IncreaseDifficultyOverTime()
     {
-        while (true)
+        while (spawningActive)
         {
             yield return new WaitForSeconds(difficultyInterval);
 
@@ -156,5 +235,22 @@ public class EnemySpawner : MonoBehaviour
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(playerTransform.position, spawnRadius);
         }
+    }
+
+    // 公开方法，用于外部强制停止生成
+    public void StopSpawning()
+    {
+        spawningActive = false;
+    }
+
+    // 公开方法，用于获取当前状态
+    public bool IsSpawningActive()
+    {
+        return spawningActive;
+    }
+
+    public int GetCurrentEnemies()
+    {
+        return currentEnemies;
     }
 }

@@ -69,7 +69,7 @@ public class WeaponHold : MonoBehaviour
         }
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         if (fireTimer > 0)
         {
@@ -180,6 +180,7 @@ public class WeaponHold : MonoBehaviour
         // 如果没有手柄输入，则使用鼠标
         else
         {
+            if(mainCamera == null) return;
             Vector3 mouseWorldPosition = mainCamera.ScreenToWorldPoint(Input.mousePosition);
             mouseWorldPosition.z = 0f;
             aimDirection = (mouseWorldPosition - playerPosition);

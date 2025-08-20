@@ -4,6 +4,7 @@ using Cinemachine;
 
 public class PlayerHealth : MonoBehaviour
 {
+
     [SerializeField] private int maxHealth = 100;
     [SerializeField] private float invincibilityTime = 1f; // 无敌时间（秒）
 
@@ -27,6 +28,8 @@ public class PlayerHealth : MonoBehaviour
 
     private int currentHealth;
     private float invincibilityTimer = 0f;
+
+    private bool isDead = false;
 
     private void Start()
     {
@@ -59,7 +62,7 @@ public class PlayerHealth : MonoBehaviour
         }
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         // 更新无敌计时器
         if (invincibilityTimer > 0)
@@ -71,6 +74,12 @@ public class PlayerHealth : MonoBehaviour
         if (shakeTimer > 0)
         {
             shakeTimer -= Time.deltaTime;
+            //噪声参数缓慢恢复
+            if (noise != null)
+            {
+                noise.m_AmplitudeGain = Mathf.Lerp(noise.m_AmplitudeGain, originalShakeAmplitude, Time.deltaTime);
+                noise.m_FrequencyGain = Mathf.Lerp(noise.m_FrequencyGain, originalShakeFrequency, Time.deltaTime);
+            }
             if (shakeTimer <= 0f)
             {
                 // 震动结束，重置噪声参数
@@ -177,6 +186,9 @@ public class PlayerHealth : MonoBehaviour
     private void Die()
     {
         Debug.Log("玩家死亡！");
+        isDead = true;
         // 这里实现玩家死亡逻辑（例如游戏结束）
     }
+
+    public bool IsDead() => isDead;
 }

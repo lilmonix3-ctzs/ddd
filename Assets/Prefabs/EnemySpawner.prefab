@@ -51,8 +51,12 @@ MonoBehaviour:
   spawnRadius: 10
   minDistanceFromPlayer: 0.1
   spawnCheckRadius: 1
+  totalTimeToSpawn: 90
   increaseDifficultyOverTime: 1
   difficultyInterval: 30
   minSpawnInterval: 0.5
   spawnIntervalDecrease: 0.1
   maxEnemiesIncrease: 2
+  portalPrefab: {fileID: 2471299135480978864, guid: 174851ba5d99fd44d8e1901a9f65d838, type: 3}
+  portalSpawnOffset: {x: 0, y: 0, z: 0}
+  nextSceneName: NextLevel

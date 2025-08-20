@@ -43,6 +43,12 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Portal
+    uniqueID: 4030816095
+    locked: 0
+  - name: Coin
+    uniqueID: 1420644491
+    locked: 0
   - name: Role
     uniqueID: 2567418631
     locked: 0

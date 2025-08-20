@@ -61,6 +61,16 @@ public class BaseMovement : MonoBehaviour
             // 启动闪避间隔计时器
             StartCoroutine(DodgeCooldown());
         }
+        HandlePushForce();
+    }
+
+    private void HandlePushForce()
+    {
+        if (!iswalking)
+        {
+            //作用在玩家身上的推力设置为0
+            rb.velocity = Vector2.zero;
+        }
     }
 
     private IEnumerator DodgeCooldown()
@@ -130,5 +140,5 @@ public class BaseMovement : MonoBehaviour
     public bool IsWalking() => iswalking;
     public bool IsDodging() => isdodging;
     public bool IsFacingRight() => toRight;
-    public bool IsSlowed() => speed == shootingSpeed;
+    public bool IsSlowed() => speed == shootingSpeed && iswalking;
 }

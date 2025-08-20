@@ -119,6 +119,11 @@ MonoBehaviour:
   KNscale: 30
   deathEffect: {fileID: 0}
   deathEffectDuration: 1
+  coinPrefab: {fileID: 2336733537815729945, guid: 8e825bfedd48a6242b93f9bb1ded46b7, type: 3}
+  minCoins: 1
+  maxCoins: 3
+  coinSpreadForce: 2
+  coinSpawnOffset: {x: 0, y: 0.5}
 --- !u!1 &2376866947058797182
 GameObject:
   m_ObjectHideFlags: 0
@@ -191,7 +196,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1727548665
-  m_SortingLayer: 1
+  m_SortingLayer: 3
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 35f1a451d5a062a4d984be5cfb647c99, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}

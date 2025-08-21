@@ -20,3 +20,4 @@ MonoBehaviour:
   attackSpeed: 1
   attackRange: 5
   ReloadTime: 1
+  magazineSize: 5

@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class Enemy : MonoBehaviour
 {
@@ -16,27 +17,65 @@ public class Enemy : MonoBehaviour
     [SerializeField] private GameObject deathEffect;
     [SerializeField] private float deathEffectDuration = 1f;
 
+    [Header("金币掉落设置")]
+    [SerializeField] private GameObject coinPrefab; // 金币预制体
+    [SerializeField] private int minCoins = 1; // 最小掉落金币数量
+    [SerializeField] private int maxCoins = 3; // 最大掉落金币数量
+    [SerializeField] private float coinSpreadForce = 2f; // 金币散开力度
+    [SerializeField] private Vector2 coinSpawnOffset = new Vector2(0, 0.5f); // 金币生成偏移
+
     private Transform playerTransform;
     private EnemySpawner spawner;
     private float attackTimer = 0f;
     private Rigidbody2D rb;
     private Vector2 currentVelocity;
+    private bool isDead = false;
 
-    private void Awake()
+    private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
 
-        playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
+        // 使用更安全的方式查找玩家
+        FindPlayer();
 
+        // 如果没有找到玩家，尝试在更新中继续查找
         if (playerTransform == null)
         {
-            Debug.LogError("未找到玩家对象！请确保玩家有'Player'标签");
+            StartCoroutine(FindPlayerRoutine());
         }
     }
 
-    private void Update()
+    private IEnumerator FindPlayerRoutine()
     {
-        if (playerTransform == null) return;
+        int attempts = 0;
+        while (playerTransform == null && attempts < 10)
+        {
+            yield return new WaitForSeconds(0.5f);
+            FindPlayer();
+            attempts++;
+        }
+    }
+
+    private void FindPlayer()
+    {
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null)
+        {
+            playerTransform = playerObj.transform;
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        if (playerTransform == null)
+        {
+            // 如果玩家仍然为空，尝试再次查找
+            if (Time.frameCount % 60 == 0) // 每60帧尝试一次
+            {
+                FindPlayer();
+            }
+            return;
+        }
 
         // 更新攻击计时器
         if (attackTimer > 0)
@@ -61,7 +100,6 @@ public class Enemy : MonoBehaviour
 
     private void MoveTowardsPlayer()
     {
-
         Vector2 direction = (playerTransform.position - transform.position).normalized;
         float distance = Vector2.Distance(transform.position, playerTransform.position);
 
@@ -98,10 +136,15 @@ public class Enemy : MonoBehaviour
 
     public void TakeDamage(int amount)
     {
+        if (isDead) return;
+
         health -= amount;
         //击退效果
-        Vector2 knockbackDirection = (transform.position - playerTransform.position).normalized;
-        rb.AddForce(knockbackDirection * KNscale); // 调整200f以改变击退力度
+        if (playerTransform != null)
+        {
+            Vector2 knockbackDirection = (transform.position - playerTransform.position).normalized;
+            rb.AddForce(knockbackDirection * KNscale); // 调整200f以改变击退力度
+        }
 
         if (health <= 0)
         {
@@ -111,6 +154,12 @@ public class Enemy : MonoBehaviour
 
     private void Die()
     {
+        if (isDead) return;
+        isDead = true;
+
+        // 掉落金币
+        DropCoins();
+
         // 通知生成器敌人死亡
         if (spawner != null)
         {
@@ -126,6 +175,44 @@ public class Enemy : MonoBehaviour
 
         // 销毁敌人
         Destroy(gameObject);
+    }
+
+    private void DropCoins()
+    {
+        if (coinPrefab == null)
+        {
+            Debug.LogWarning("未设置金币预制体，无法掉落金币");
+            return;
+        }
+
+        // 随机决定掉落金币数量
+        int coinCount = Random.Range(minCoins, maxCoins + 1);
+
+        for (int i = 0; i < coinCount; i++)
+        {
+            // 计算金币位置（带偏移）
+            Vector3 spawnPosition = transform.position + new Vector3(
+                coinSpawnOffset.x + Random.Range(-0.2f, 0.2f),
+                coinSpawnOffset.y + Random.Range(-0.1f, 0.1f),
+                0
+            );
+
+            // 实例化金币
+            GameObject coin = Instantiate(coinPrefab, spawnPosition, Quaternion.identity);
+
+            // 添加随机的散开力
+            Rigidbody2D coinRb = coin.GetComponent<Rigidbody2D>();
+            if (coinRb != null)
+            {
+                Vector2 force = new Vector2(
+                    Random.Range(-coinSpreadForce, coinSpreadForce),
+                    Random.Range(1f, coinSpreadForce)
+                );
+                coinRb.AddForce(force, ForceMode2D.Impulse);
+            }
+        }
+
+        Debug.Log($"敌人掉落 {coinCount} 枚金币");
     }
 
     // 设置生成器引用

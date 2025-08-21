@@ -6,17 +6,21 @@ using Cinemachine;
 public class BaseMovement : MonoBehaviour
 {
 
+    [Header("Movement Settings")]
     [SerializeField] private float originSpeed = 5f;
     [SerializeField] private float shootingSpeed = 3f;
     [SerializeField] private float moveSmoothTime = 0.1f; // 平滑移动时间
+    [Header("Collision Settings")]
     [SerializeField] private float playerwidth = .35f;
     [SerializeField] private float playerheight = .5f;
+    [SerializeField] private Vector2 mapMinBounds = new Vector2(-16, -16);
+    [SerializeField] private Vector2 mapMaxBounds = new Vector2(16, 16);
+    [Header("Dodge Settings")]
     [SerializeField] private int dogeSpeed = 10; // 闪避速度
     [SerializeField] private int dogeTime = 20; // 闪避持续时间
     [SerializeField] private float dodgeinterval = 2f; // 闪避间隔时间
-
+    [Header("References")]
     [SerializeField] private WeaponHold weaponHold; // 武器持有组件
-
     [SerializeField] private SpriteAnimator animator;
 
     Rigidbody2D rb;
@@ -122,7 +126,10 @@ public class BaseMovement : MonoBehaviour
                 //{
                 //    transform.position += (Vector3)move * MoveDistance;
                 //}
-                rb.MovePosition(rb.position + move * MoveDistance);
+                Vector2 newPosition = rb.position + move * MoveDistance;
+                newPosition.x = Mathf.Clamp(newPosition.x, mapMinBounds.x + playerwidth, mapMaxBounds.x - playerwidth);
+                newPosition.y = Mathf.Clamp(newPosition.y, mapMinBounds.y + playerheight, mapMaxBounds.y - playerheight);
+                rb.MovePosition(newPosition);
                 lastMovement = move.normalized;
             }
             else
@@ -137,6 +144,29 @@ public class BaseMovement : MonoBehaviour
         lastMovement = Vector2.zero;
     }
 
+    // 可视化边界（在Scene视图中显示）
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.green;
+        Vector3 center = new Vector3(
+            (mapMinBounds.x + mapMaxBounds.x) / 2,
+            (mapMinBounds.y + mapMaxBounds.y) / 2,
+            0
+        );
+        Vector3 size = new Vector3(
+            mapMaxBounds.x - mapMinBounds.x,
+            mapMaxBounds.y - mapMinBounds.y,
+            1
+        );
+        Gizmos.DrawWireCube(center, size);
+    }
+
+    // 设置地图边界（可以从其他脚本调用）
+    public void SetMapBounds(Vector2 min, Vector2 max)
+    {
+        mapMinBounds = min;
+        mapMaxBounds = max;
+    }
     public bool IsWalking() => iswalking;
     public bool IsDodging() => isdodging;
     public bool IsFacingRight() => toRight;

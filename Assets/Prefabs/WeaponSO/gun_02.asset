@@ -19,4 +19,5 @@ MonoBehaviour:
   bulletSpeed: 10
   attackSpeed: 4
   attackRange: 3.5
-  ReloadTime: 1
+  ReloadTime: 2
+  magazineSize: 20

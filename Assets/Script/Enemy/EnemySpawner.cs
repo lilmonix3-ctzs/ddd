@@ -157,7 +157,7 @@ public class EnemySpawner : MonoBehaviour
 
         // 如果多次尝试失败，返回玩家位置（应避免这种情况）
         Debug.LogWarning("无法找到有效生成位置，使用备用位置");
-        return (Vector2)playerTransform.position + Random.insideUnitCircle.normalized * minDistanceFromPlayer;
+        return (Vector2)playerTransform.position + Random.insideUnitCircle.normalized * spawnRadius;
     }
 
     // 敌人死亡时调用

@@ -14,4 +14,5 @@ public class WeaponSO : ScriptableObject
     public float attackSpeed = 1f; // 每秒攻击次数
     public float attackRange = 5f; // 攻击范围
     public float ReloadTime = 1f;  //换弹时间
+    public int magazineSize = 10; // 弹夹大小
 }

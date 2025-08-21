@@ -4,6 +4,11 @@ using System.Collections;
 
 public class WeaponHold : MonoBehaviour
 {
+    //[Header("Animator Settings")]
+    Animator animator; // 动画控制器
+    private string ShootingAni = "Shoot";
+    private string ReloadAni = "Reload"; 
+
     [Header("Weapon Settings")]
     [SerializeField] private Transform weaponHoldPoint;
     [SerializeField] private WeaponSO[] weaponSOs;
@@ -14,8 +19,9 @@ public class WeaponHold : MonoBehaviour
     [SerializeField] private float reloadTime = 1.5f;
     [SerializeField] private float gamepadDeadzone = 0.2f; // 手柄死区阈值
     [SerializeField] private Transform Aim;
-    [SerializeField] private float aimToMouse = 0.7f; //瞄准线缩放比
-    [SerializeField] private float maxaimScale = 1.5f; //最大缩放
+    [SerializeField] private float aimToMouse = 0.7f; // 瞄准线缩放比
+    [SerializeField] private float maxaimScale = 1.5f; // 最大缩放
+    [SerializeField] private float autoReloadDelay = 0.5f; // 自动换弹延迟时间
 
     private int weaponCount;
     private int weaponIndex;
@@ -24,9 +30,13 @@ public class WeaponHold : MonoBehaviour
 
     // 射击控制相关变量
     private bool isReloading = false;
+    private bool isAutoReload = false;
     private float fireTimer = 0f;
     private WeaponSO currentWeapon;
     private bool isFireing = false;
+    private float timeSinceLastFire = 0f; // 上次射击后的时间
+    private Coroutine reloadCoroutine; // 换弹协程引用
+    private Coroutine autoReloadCoroutine; // 自动换弹协程引用
 
     private void Awake()
     {
@@ -78,28 +88,125 @@ public class WeaponHold : MonoBehaviour
 
         UpdateWeaponHoldPoint();
         HandleWeaponInteractions();
+        HandleAnimator();
+        HandleAimVisual();
 
-        if (!isReloading && bulletPool.Count <= 0)
+        // 更新上次射击后的时间
+        if (!isFireing)
         {
-            StartCoroutine(ReloadBullets());
+            timeSinceLastFire += Time.deltaTime;
+        }
+        else
+        {
+            timeSinceLastFire = 0f;
+        }
+
+        // 检查是否需要自动换弹
+        CheckAutoReload();
+    }
+
+    private void HandleAimVisual()
+    {
+        if (Aim == null) return;
+        if (isReloading || isAutoReload)
+        {
+            Aim.gameObject.SetActive(false);
+        }
+        else
+        {
+            Aim.gameObject.SetActive(true);
         }
     }
 
-    private IEnumerator ReloadBullets()
+    private void HandleAnimator()
     {
-        isReloading = true;
+        if (animator == null) return;
+        animator.SetBool(ShootingAni, isFireing);
+        animator.SetBool(ReloadAni, isReloading || isAutoReload);
+    }
 
-        while (bulletPool.Count < bulletPoolSize)
+    // 检查是否需要自动换弹
+    private void CheckAutoReload()
+    {
+        // 如果不在换弹中，子弹池不为空但不满，且一段时间没有射击
+        if (!isReloading &&
+            bulletPool.Count < bulletPoolSize &&
+            bulletPool.Count > 0 &&
+            timeSinceLastFire >= autoReloadDelay)
+        {
+            // 如果没有正在进行的自动换弹，则开始自动换弹
+            if (autoReloadCoroutine == null)
+            {
+                autoReloadCoroutine = StartCoroutine(AutoReloadBullets());
+                isAutoReload = true;
+            }
+        }
+        else if (timeSinceLastFire < autoReloadDelay && autoReloadCoroutine != null)
+        {
+            // 如果在自动换弹过程中又开始射击，取消自动换弹
+            StopCoroutine(autoReloadCoroutine);
+            autoReloadCoroutine = null;
+            isAutoReload = false;
+            Debug.Log("自动换弹被取消");
+        }
+    }
+
+    // 自动换弹协程
+    private IEnumerator AutoReloadBullets()
+    {
+        Debug.Log("开始自动换弹");
+
+        while (bulletPool.Count < bulletPoolSize && timeSinceLastFire >= autoReloadDelay)
         {
             yield return new WaitForSeconds(reloadTime / bulletPoolSize);
+
+            // 检查是否在换弹过程中开始了射击
+            if (timeSinceLastFire < autoReloadDelay)
+            {
+                Debug.Log("自动换弹被中断");
+                isAutoReload = false;
+                break;
+            }
+
             GameObject bullet = Instantiate(bulletPrefab);
             bullet.SetActive(false);
             bulletPool.Enqueue(bullet);
 
-            Debug.Log($"Reloading: {bulletPool.Count} / {bulletPoolSize}");
+            Debug.Log($"自动换弹中: {bulletPool.Count} / {bulletPoolSize}");
+        }
+
+        autoReloadCoroutine = null;
+        isAutoReload = false;
+        Debug.Log("自动换弹完成");
+    }
+
+    // 原有的手动换弹协程
+    private IEnumerator ReloadBullets()
+    {
+        isReloading = true;
+        Debug.Log("开始手动换弹");
+
+        while (bulletPool.Count < bulletPoolSize)
+        {
+            yield return new WaitForSeconds(reloadTime / bulletPoolSize);
+
+            // 检查是否在换弹过程中开始了射击
+            if (isFireing)
+            {
+                Debug.Log("手动换弹被中断");
+                isReloading = false;
+                yield break;
+            }
+
+            GameObject bullet = Instantiate(bulletPrefab);
+            bullet.SetActive(false);
+            bulletPool.Enqueue(bullet);
+
+            Debug.Log($"手动换弹中: {bulletPool.Count} / {bulletPoolSize}");
         }
 
         isReloading = false;
+        Debug.Log("手动换弹完成");
     }
 
     private void HandleWeaponInteractions()
@@ -124,6 +231,23 @@ public class WeaponHold : MonoBehaviour
 
     private void TryFireBullet()
     {
+        // 如果在换弹过程中射击，中断换弹
+        if (isReloading && reloadCoroutine != null)
+        {
+            StopCoroutine(reloadCoroutine);
+            isReloading = false;
+            Debug.Log("换弹被射击中断");
+        }
+
+        // 如果正在自动换弹，中断自动换弹
+        if (autoReloadCoroutine != null)
+        {
+            StopCoroutine(autoReloadCoroutine);
+            autoReloadCoroutine = null;
+            isAutoReload = false;
+            Debug.Log("自动换弹被射击中断");
+        }
+
         if (isReloading || fireTimer > 0)
         {
             isFireing = !isReloading;
@@ -133,10 +257,12 @@ public class WeaponHold : MonoBehaviour
         if (bulletPool.Count <= 0)
         {
             isFireing = false;
-            StartCoroutine(ReloadBullets());
+            reloadCoroutine = StartCoroutine(ReloadBullets());
             return;
         }
+
         isFireing = true;
+        timeSinceLastFire = 0f; // 重置未射击时间
         FireBullet();
         fireTimer = 1f / currentWeapon.attackSpeed;
     }
@@ -166,7 +292,6 @@ public class WeaponHold : MonoBehaviour
 
         Vector3 playerPosition = transform.position;
         Vector3 aimDirection = Vector3.zero;
-        //bool usingGamepad = false;
 
         // 获取手柄瞄准输入
         Vector2 gamepadAim = GameInput.Instance.GetAimDir();
@@ -175,19 +300,17 @@ public class WeaponHold : MonoBehaviour
         if (gamepadAim.magnitude > gamepadDeadzone)
         {
             aimDirection = new Vector3(gamepadAim.x, gamepadAim.y, 0f);
-            //usingGamepad = true;
         }
         // 如果没有手柄输入，则使用鼠标
         else
         {
-            if(mainCamera == null) return;
+            if (mainCamera == null) return;
             Vector3 mouseWorldPosition = mainCamera.ScreenToWorldPoint(Input.mousePosition);
             mouseWorldPosition.z = 0f;
             aimDirection = (mouseWorldPosition - playerPosition);
             // 使用鼠标输入时，缩放瞄准线
             float aimScale = Mathf.Clamp(aimDirection.magnitude * aimToMouse, 0f, maxaimScale);
-            Aim.localScale = new Vector3(aimScale, 1f,1f);
-
+            Aim.localScale = new Vector3(aimScale, 1f, 1f);
         }
 
         // 限制距离不超过最大范围
@@ -241,6 +364,11 @@ public class WeaponHold : MonoBehaviour
             weaponInstance.name = weaponSO.objectName;
             weaponInstance.tag = "Weapon";
             currentWeapon = weaponSO;
+            animator = weaponInstance.GetComponent<Animator>();
+            reloadTime = weaponSO.ReloadTime;
+            bulletPoolSize = weaponSO.magazineSize;
+            bulletPool.Clear();
+            animator.speed = weaponSO.attackSpeed;
         }
     }
 
@@ -261,4 +389,22 @@ public class WeaponHold : MonoBehaviour
     public int GetWeaponCount() => weaponCount;
     public int GetCurrentWeaponIndex() => weaponIndex;
     public bool IsFiring() => isFireing;
+
+    // 获取当前子弹数量
+    public int GetCurrentBulletCount() => bulletPool.Count;
+
+    // 获取最大子弹数量
+    public int GetMaxBulletCount() => bulletPoolSize;
+
+    // 检查是否正在换弹
+    public bool IsReloading() => isReloading;
+
+    // 手动触发换弹
+    public void ManualReload()
+    {
+        if (!isReloading && bulletPool.Count < bulletPoolSize)
+        {
+            reloadCoroutine = StartCoroutine(ReloadBullets());
+        }
+    }
 }

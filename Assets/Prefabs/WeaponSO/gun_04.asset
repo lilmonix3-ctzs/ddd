@@ -18,6 +18,6 @@ MonoBehaviour:
   damage: 30
   bulletSpeed: 15
   attackSpeed: 1
-  attackRange: 5
-  ReloadTime: 1
+  attackRange: 6
+  ReloadTime: 5
   magazineSize: 5

@@ -13,8 +13,9 @@ public class BaseMovement : MonoBehaviour
     [Header("Collision Settings")]
     [SerializeField] private float playerwidth = .35f;
     [SerializeField] private float playerheight = .5f;
-    [SerializeField] private Vector2 mapMinBounds = new Vector2(-16, -16);
-    [SerializeField] private Vector2 mapMaxBounds = new Vector2(16, 16);
+    [SerializeField] private PolygonCollider2D boundCollider;
+    private Vector2 mapMinBounds = new Vector2(-16, -16);
+    private Vector2 mapMaxBounds = new Vector2(16, 16);
     [Header("Dodge Settings")]
     [SerializeField] private int dogeSpeed = 10; // 闪避速度
     [SerializeField] private int dogeTime = 20; // 闪避持续时间
@@ -43,6 +44,12 @@ public class BaseMovement : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         Initializecamerafollow();
+        if(boundCollider != null)
+        {
+            mapMaxBounds = boundCollider.points[0];
+            mapMinBounds = boundCollider.points[2];
+            Debug.Log(mapMaxBounds);
+        }
     }
 
     private void Initializecamerafollow()

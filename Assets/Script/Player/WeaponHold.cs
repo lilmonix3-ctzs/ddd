@@ -7,7 +7,7 @@ public class WeaponHold : MonoBehaviour
     //[Header("Animator Settings")]
     Animator animator; // 动画控制器
     private string ShootingAni = "Shoot";
-    private string ReloadAni = "Reload"; 
+    private string ReloadAni = "Reload";
 
     [Header("Weapon Settings")]
     [SerializeField] private Transform weaponHoldPoint;
@@ -46,11 +46,57 @@ public class WeaponHold : MonoBehaviour
 
     private void InitializeBulletPool()
     {
+        // 清空现有的子弹池
+        while (bulletPool.Count > 0)
+        {
+            GameObject bullet = bulletPool.Dequeue();
+            Destroy(bullet);
+        }
+
         for (int i = 0; i < bulletPoolSize; i++)
         {
             GameObject bullet = Instantiate(bulletPrefab);
             bullet.SetActive(false);
             bulletPool.Enqueue(bullet);
+        }
+        Debug.Log($"初始化弹夹: {bulletPool.Count}/{bulletPoolSize}");
+    }
+
+    // 新增方法：装满弹夹
+    private void RefillMagazine()
+    {
+        // 清空现有的子弹池
+        while (bulletPool.Count > 0)
+        {
+            GameObject bullet = bulletPool.Dequeue();
+            Destroy(bullet);
+        }
+
+        // 创建满弹夹
+        for (int i = 0; i < bulletPoolSize; i++)
+        {
+            GameObject bullet = Instantiate(bulletPrefab);
+            bullet.SetActive(false);
+            bulletPool.Enqueue(bullet);
+        }
+
+        Debug.Log($"弹夹已装满: {bulletPool.Count}/{bulletPoolSize}");
+
+        // 如果正在换弹，停止换弹
+        if (isReloading && reloadCoroutine != null)
+        {
+            StopCoroutine(reloadCoroutine);
+            isReloading = false;
+            Debug.Log("换弹被武器切换中断");
+        }
+
+        // 如果正在自动换弹，停止自动换弹
+        if (isAutoReload && autoReloadCoroutine != null)
+        {
+            StopCoroutine(autoReloadCoroutine);
+            autoReloadCoroutine = null;
+            isAutoReload = false;
+            Debug.Log("自动换弹被武器切换中断");
         }
     }
 
@@ -79,6 +125,11 @@ public class WeaponHold : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        HandleWeaponInteractions();
+    }
+
     private void FixedUpdate()
     {
         if (fireTimer > 0)
@@ -87,7 +138,6 @@ public class WeaponHold : MonoBehaviour
         }
 
         UpdateWeaponHoldPoint();
-        HandleWeaponInteractions();
         HandleAnimator();
         HandleAimVisual();
 
@@ -131,7 +181,7 @@ public class WeaponHold : MonoBehaviour
         // 如果不在换弹中，子弹池不为空但不满，且一段时间没有射击
         if (!isReloading &&
             bulletPool.Count < bulletPoolSize &&
-            bulletPool.Count > 0 &&
+            bulletPool.Count >= 0 &&
             timeSinceLastFire >= autoReloadDelay)
         {
             // 如果没有正在进行的自动换弹，则开始自动换弹
@@ -367,8 +417,13 @@ public class WeaponHold : MonoBehaviour
             animator = weaponInstance.GetComponent<Animator>();
             reloadTime = weaponSO.ReloadTime;
             bulletPoolSize = weaponSO.magazineSize;
+            if (animator != null)
+            {
+                animator.speed = weaponSO.attackSpeed;
+            }
+            maxaimScale = 0.8f * weaponSO.attackRange;
             bulletPool.Clear();
-            animator.speed = weaponSO.attackSpeed;
+            //RefillMagazine();
         }
     }
 
@@ -406,5 +461,11 @@ public class WeaponHold : MonoBehaviour
         {
             reloadCoroutine = StartCoroutine(ReloadBullets());
         }
+    }
+
+    // 新增：强制装满弹夹（可以从其他脚本调用）
+    public void ForceRefillMagazine()
+    {
+        RefillMagazine();
     }
 }

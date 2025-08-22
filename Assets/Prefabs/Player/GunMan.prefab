@@ -356,8 +356,7 @@ MonoBehaviour:
   moveSmoothTime: 0.1
   playerwidth: 0.2
   playerheight: 0.3
-  mapMinBounds: {x: -16, y: -16}
-  mapMaxBounds: {x: 16, y: 16}
+  boundCollider: {fileID: 8908033703485435761, guid: 2dcd748f3e77c014ab2a462cc4250ae8, type: 3}
   dogeSpeed: 10
   dogeTime: 20
   dodgeinterval: 2
@@ -389,7 +388,7 @@ MonoBehaviour:
   gamepadDeadzone: 0.2
   Aim: {fileID: 1030821161297416525}
   aimToMouse: 0.6
-  maxaimScale: 3
+  maxaimScale: 3.2
   autoReloadDelay: 0.5
 --- !u!114 &7839371634580720210
 MonoBehaviour:

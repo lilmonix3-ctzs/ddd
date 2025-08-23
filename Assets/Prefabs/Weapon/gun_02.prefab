@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7880066654226189689}
   - component: {fileID: -1318519569331767342}
+  - component: {fileID: 8880899518608211058}
   m_Layer: 8
   m_Name: gun_02
   m_TagString: Untagged
@@ -68,6 +69,27 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: -0.06}
   m_Size: {x: 0.5, y: 0.32}
   m_Direction: 1
+--- !u!95 &8880899518608211058
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2519569580577918510}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: a5c85eea30e04dd439cc72cd6ea1dd79, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &4295079516082868787
 GameObject:
   m_ObjectHideFlags: 0
@@ -139,7 +161,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 1451005127
-  m_SortingLayer: 2
+  m_SortingLayer: 4
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 9cacf7f03ec50484d9036324d7adfdf1, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}

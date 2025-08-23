@@ -15,6 +15,7 @@ public class Enemy : MonoBehaviour
 
     [Header("死亡效果")]
     [SerializeField] private GameObject deathEffect;
+    [SerializeField] private GameObject hitEffect; 
     [SerializeField] private float deathEffectDuration = 1f;
 
     [Header("金币掉落设置")]
@@ -137,6 +138,13 @@ public class Enemy : MonoBehaviour
     public void TakeDamage(int amount)
     {
         if (isDead) return;
+
+        // 播放受击效果
+        if (hitEffect != null)
+        {
+            GameObject effect = Instantiate(hitEffect, transform.position, Quaternion.identity);
+            Destroy(effect, 0.3f); // 0.5秒后销毁受击效果
+        }
 
         health -= amount;
         //击退效果

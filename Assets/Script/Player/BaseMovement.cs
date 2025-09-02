@@ -23,6 +23,8 @@ public class BaseMovement : MonoBehaviour
     [Header("References")]
     [SerializeField] private WeaponHold weaponHold; // 武器持有组件
     [SerializeField] private SpriteAnimator animator;
+    [Header("AimPoint")]
+    [SerializeField] private Transform AimPoint; // 瞄准点
 
     Rigidbody2D rb;
     private CinemachineVirtualCamera virtualCamera;
@@ -73,6 +75,25 @@ public class BaseMovement : MonoBehaviour
             StartCoroutine(DodgeCooldown());
         }
         HandlePushForce();
+        Handlecamerafollow();
+    }
+
+    private void Handlecamerafollow()
+    {
+        if (virtualCamera != null)
+        {
+            //如果瞄准点未启用，则跟随玩家
+            if (AimPoint.gameObject.activeInHierarchy)
+            {
+                virtualCamera.Follow = AimPoint.transform;
+                virtualCamera.LookAt = AimPoint.transform;
+            }
+            else
+            {
+                virtualCamera.Follow = this.transform;
+                virtualCamera.LookAt = this.transform;
+            }
+        }
     }
 
     private void HandlePushForce()

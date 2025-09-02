@@ -19,8 +19,9 @@ public class WeaponHold : MonoBehaviour
     [SerializeField] private float reloadTime = 1.5f;
     [SerializeField] private float gamepadDeadzone = 0.2f; // 手柄死区阈值
     [SerializeField] private Transform Aim;
-    [SerializeField] private float aimToMouse = 0.7f; // 瞄准线缩放比
-    [SerializeField] private float maxaimScale = 1.5f; // 最大缩放
+    [SerializeField] private Transform AimPoint;
+    [SerializeField] private float aimToMouse = 0.6f; // 瞄准线缩放比
+    [SerializeField] private float maxaimScale = 3.5f; // 最大缩放
     [SerializeField] private float autoReloadDelay = 0.5f; // 自动换弹延迟时间
 
     private int weaponCount;
@@ -165,6 +166,16 @@ public class WeaponHold : MonoBehaviour
         else
         {
             Aim.gameObject.SetActive(true);
+        }
+
+        if (AimPoint == null) return;
+        if (isReloading || isAutoReload)
+        {
+            AimPoint.gameObject.SetActive(false);
+        }
+        else
+        {
+            AimPoint.gameObject.SetActive(true);
         }
     }
 
@@ -361,6 +372,10 @@ public class WeaponHold : MonoBehaviour
             // 使用鼠标输入时，缩放瞄准线
             float aimScale = Mathf.Clamp(aimDirection.magnitude * aimToMouse, 0f, maxaimScale);
             Aim.localScale = new Vector3(aimScale, 1f, 1f);
+            if (AimPoint != null)
+            {
+                AimPoint.position = Aim.position + Aim.right * (aimScale + 0.6f);
+            }
         }
 
         // 限制距离不超过最大范围
@@ -452,7 +467,7 @@ public class WeaponHold : MonoBehaviour
     public int GetMaxBulletCount() => bulletPoolSize;
 
     // 检查是否正在换弹
-    public bool IsReloading() => isReloading;
+    public bool IsReloading() => isReloading || isAutoReload;
 
     // 手动触发换弹
     public void ManualReload()
@@ -460,6 +475,7 @@ public class WeaponHold : MonoBehaviour
         if (!isReloading && bulletPool.Count < bulletPoolSize)
         {
             reloadCoroutine = StartCoroutine(ReloadBullets());
+            isReloading = true;
         }
     }
 

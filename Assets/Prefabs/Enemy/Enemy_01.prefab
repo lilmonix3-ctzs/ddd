@@ -109,6 +109,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32aa73e07e478d845b42412156e66cda, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enemyData: {fileID: 11400000, guid: e0af76560a086e84ea81d8b5f17a5b1e, type: 2}
   health: 15
   damage: 10
   moveSpeed: 1.5
@@ -117,7 +118,18 @@ MonoBehaviour:
   attackCooldown: 1
   smoothTime: 0.1
   KNscale: 30
+  chargeDistance: 5
+  chargeSpeed: 8
+  chargeCooldown: 3
+  rangedAttackDistance: 7
+  projectilePrefab: {fileID: 0}
+  projectileSpawnPoint: {fileID: 0}
+  splitCount: 2
+  splitEnemyPrefab: {fileID: 0}
+  lurkerHideTime: 3
+  lurkerAttackTime: 2
   deathEffect: {fileID: 0}
+  hitEffect: {fileID: 0}
   deathEffectDuration: 1
   coinPrefab: {fileID: 2336733537815729945, guid: 8e825bfedd48a6242b93f9bb1ded46b7, type: 3}
   minCoins: 1
